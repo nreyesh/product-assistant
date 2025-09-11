@@ -18,7 +18,7 @@ class ParisScraper:
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def get_product_urls(self, query: str, max_urls: int = 5) -> list:
+    def get_product_urls(self, query: str) -> list:
         """
         Takes a search query, builds a Paris.cl URL, and scrapes product URLs.
         """
@@ -49,8 +49,6 @@ class ParisScraper:
                 href = link['href']
                 if href.startswith('/') and (full_url := f"{base_url}{href}") not in product_urls:
                     product_urls.append(full_url)
-                if len(product_urls) >= max_urls:
-                    break
             
             return product_urls
 
@@ -138,18 +136,27 @@ class ParisScraper:
     def scrape_paris_products(self, query, max_products=5):
         """
         Scrapes products from Paris.cl based on a search query.
+        It continues until the required number of products with comments is found,
+        or it runs out of URLs.
         """
-        product_urls = self.get_product_urls(query, max_urls=max_products)
+        product_urls = self.get_product_urls(query)
         if not product_urls:
             print("No product URLs found.")
             return []
 
         products_data = []
         for url in product_urls:
+            if len(products_data) >= max_products:
+                print(f"Found {max_products} products with comments. Stopping.")
+                break
+
             print(f"Scraping data from: {url}")
             product_details = self.scrape_paris_product(url)
-            if product_details:
+            
+            if product_details and product_details.get('num_reviews', '0') != '0' and product_details.get('best_reviews'):
                 products_data.append(product_details)
+            elif product_details:
+                print(f" - Product has no reviews, skipping.")
         
         return products_data
 

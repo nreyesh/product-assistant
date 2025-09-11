@@ -6,7 +6,9 @@ dist/
 wheels/
 *.egg-info
 
+# Folders
 logs
+scraped_data
 
 # Virtual environments
 .venv

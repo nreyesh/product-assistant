@@ -1,5 +1,5 @@
 astra_db:
-  collection_name: "product-assistant-db"
+  collection_name: "product_assistant_db"
 
 embedding_model:
   provider: "google"

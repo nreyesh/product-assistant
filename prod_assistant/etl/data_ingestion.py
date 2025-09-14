@@ -40,7 +40,6 @@ class DataIngestion:
         self.db_application_token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
         self.db_keyspace = os.getenv("ASTRA_DB_KEYSPACE")
 
-       
 
     def _get_csv_path(self):
         """
@@ -59,7 +58,7 @@ class DataIngestion:
         Load product data from CSV.
         """
         df = pd.read_csv(self.csv_path)
-        expected_columns = {'product_id','product_title', 'rating', 'total_reviews','price', 'top_reviews'}
+        expected_columns = {'product_id','product_name', 'brand', 'rating', 'num_reviews','price', 'best_reviews'}
 
         if not expected_columns.issubset(set(df.columns)):
             raise ValueError(f"CSV must contain columns: {expected_columns}")
@@ -75,11 +74,12 @@ class DataIngestion:
         for _, row in self.product_data.iterrows():
             product_entry = {
                     "product_id": row["product_id"],
-                    "product_title": row["product_title"],
+                    "product_name": row["product_name"],
+                    "brand": row["brand"],
                     "rating": row["rating"],
-                    "total_reviews": row["total_reviews"],
+                    "num_reviews": row["num_reviews"],
                     "price": row["price"],
-                    "top_reviews": row["top_reviews"]
+                    "best_reviews": row["best_reviews"]
                 }
             product_list.append(product_entry)
 
@@ -87,12 +87,13 @@ class DataIngestion:
         for entry in product_list:
             metadata = {
                     "product_id": entry["product_id"],
-                    "product_title": entry["product_title"],
+                    "product_name": entry["product_name"],
+                    "brand": entry["brand"],
                     "rating": entry["rating"],
-                    "total_reviews": entry["total_reviews"],
+                    "num_reviews": entry["num_reviews"],
                     "price": entry["price"]
             }
-            doc = Document(page_content=entry["top_reviews"], metadata=metadata)
+            doc = Document(page_content=entry["best_reviews"], metadata=metadata)
             documents.append(doc)
 
         print(f"Transformed {len(documents)} documents.")
